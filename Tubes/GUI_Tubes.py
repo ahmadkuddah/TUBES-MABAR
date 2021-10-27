@@ -35,6 +35,7 @@ canvas2.create_image( 0, 0, image = bg2,anchor = "nw")
 id_nasabah=[]
 numlist=[]
 rekening=''
+nominal=''
 Condition='belum dicantumkan'
 State='menu1'
 i=1
@@ -81,7 +82,7 @@ def ganti_pin():
     button_samping()
     return
 def transfer():
-    global Condition,State,numlist,rekening
+    global Condition,State,numlist,rekening,nominal
     if State=='menu1':
         buatjudul(240,25,'Transfer','Transfer')
         buattext(10,125,"<-- Sesama Bank Ganesha ",'Transfer')
@@ -116,7 +117,34 @@ def transfer():
             buattext(10,300,'Rekening tidak dapat ditemukan','transfer2')
             canvas2.delete('transfer_isi')
             transfer()
+            # ganti ini jadi menu gagal
             return
+    if State=='menu4':
+        id_tujuan=(no_rek_nasabah.index(rekening))
+        canvas2.delete('nominal_isi')
+        buattext(10,160,'Nama        : '+id.nasabah[id_tujuan]['nama'],'transfer4')
+        buattext(10,200,'No.Rekening : '+id.nasabah[id_tujuan]['no-rek'],'transfer4')
+        buattext(10,240,'nominal     : '+nominal,'transfer4')
+        buattext(375,280,'Benar-->','transfer4')
+        textkeluar('transfer4')
+        Condition= 'konfirmasi nominal'
+        button_samping()
+        return
+    
+    if State=='menu5':
+        # kasih 2 kondisi kalo saldo cukup lanjut konfirmasi kalo ga masuk ke layar buat batalkan transaksi atau lanjut
+        if float(nominal) <= float(id.nasabah[valkartu.get()-1]['tabungan']):
+            print(id.nasabah[valkartu.get()-1]['tabungan'])
+            print('bener')
+            return
+        else:
+            State='menu3' #ganti jadi menu gagal
+            numlist.clear()
+            buattext(10,300,'uang anda tidak mencukupi','transfer2')
+            canvas2.delete('nominal_isi')
+            transfer()
+            # ganti ini jadi menu gagal
+        return
 
     return
 
@@ -246,8 +274,29 @@ def button_samping():
                 return
 
             return
+        elif Condition=='nominal transfer':
+            if entry==8:
+                State='menu1'
+                keluar('transfer3',menu_awal)
+                canvas2.delete('nominal_isi')
+            if entry==7:
+                State='menu4'
+                menuju('transfer3',transfer)
+                canvas2.delete('nominal_isi')
+                return
+            return
+        elif Condition=='konfirmasi nominal':
+            if entry==8:
+                State='menu1'
+                keluar('transfer4',menu_awal)
+                canvas2.delete('nominal_isi')
+            if entry==7:
+                State='menu5'
+                menuju('transfer4',transfer)
+                canvas2.delete('nominal_isi')
+                return
+            return
 
-    
     
     
     
@@ -353,7 +402,7 @@ def button_numpad():
                             width  = 120)
     
     def numbers(entry):
-        global i,numlist,Condition,rekening
+        global i,numlist,Condition,rekening,nominal
         if Condition=='belum dicantumkan':
             return
         elif Condition=='login':
@@ -394,6 +443,10 @@ def button_numpad():
                 i+=1                
                 # print(numlist)
         elif Condition=='ganti pin':
+            
+
+
+
             return    
         elif Condition=='rekening transfer':
             if entry==99:
@@ -439,11 +492,9 @@ def button_numpad():
                 numlist.append(entry)
                 strings = [str(num) for num in numlist]
                 nominal = "".join(strings)
-                canvas2.delete('transfer_isi')
-                buattext(10,225,rekening,'transfer_isi')
+                canvas2.delete('nominal_isi')
+                buattext(10,225,nominal,'nominal_isi')
             return
-
-
 
     return
 def kartu():
