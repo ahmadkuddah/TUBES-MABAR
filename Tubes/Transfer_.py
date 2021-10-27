@@ -1,5 +1,6 @@
 from Data_Id import nasabah    #Import data
 from time import sleep  #Untuk memberi delay print agar lebih realistis
+import pickle   #Untuk save dan load data secara permanen
 
 no_rek_nasabah = [nasabah[id]['no-rek'] for id in range(len(nasabah))]    #List no rekening dari data
 bank_tujuan = ["Sesama Bank Ganesha", "Bank Lain", "Virtual Account"]     #List bank tujuan
@@ -53,7 +54,8 @@ def transfer_(no_rektujuan):
                 restart_transfer()
             else:   #Jika cukup, maka tabungan dari rekening pengirim akan dipindah ke tabungan rekening tujuan
                 nasabah[id]['tabungan'] = str(float(nasabah[id]['tabungan']) - nominal_transfer) #Datanya belom bisa kesimpen permanen
-                nasabah[id_tujuan]['tabungan'] = str(float(nasabah[id]['tabungan']) + nominal_transfer)
+                nasabah[id_tujuan]['tabungan'] = str(float(nasabah[id_tujuan]['tabungan']) + nominal_transfer)
+                pickle.dump(nasabah, open("nasabah.dat", "wb"))
                 print("\nTransfer berhasil\nSilahkan ambil kartu Anda kembali") #Transaksi selesai
             
         else:
