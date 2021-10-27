@@ -1,9 +1,10 @@
 import tkinter as tk
 from tkinter import *
 import Data_Id as id
-from Data_Id import*
+from Data_Id import *
 import Transfer_ as tf
-from Transfer_ import*
+from Transfer_ import *
+import pickle
 
 # membuat tampilan utama
 root=tk.Tk()
@@ -79,9 +80,9 @@ def menu_awal():
 def ganti_pin():
     global Condition,State,numlist,pinlama
     if State=='menu1':
-        buatjudul(240,25,"Ganti Pin",'ganti_pin')
-        buattext(20,180,"pin lama: ",'ganti_pin')
-        buattext(375,280,"benar-->",'ganti_pin') 
+        buatjudul(240,25,"Menu Ganti Pin",'ganti_pin')
+        buattext(20,180,"Silahkan Masukkan Pin Lama Anda: ",'ganti_pin')
+        buattext(375,280,"Benar-->",'ganti_pin') 
         textkeluar('ganti_pin')
         Condition='ganti pin'
         numlist.clear()
@@ -89,17 +90,42 @@ def ganti_pin():
         button_samping()
         return
     if State=='menu2':
-        pinnasabah=id.nasabah[valkartu.get()-1]['pin']
-        if pinlama==pinnasabah:
-            # benar mulai nanya yang baru
-            return
-        else:
-            State=='menu1'
-            buattext(20,280,'pin lama salah','ganti_pin')
-            numlist.clear()
-            ganti_pin()
+        # benar mulai nanya yang baru
+        buatjudul(240,25,"Menu Ganti Pin",'pin_baru')
+        buattext(20,180,"Silahkan Masukkan Pin Baru: ",'pin_baru')
+        buattext(375,280,"Benar-->",'pin_baru') 
+        textkeluar('pin_baru')
+        Condition='pin baru'
+        numlist.clear()
+        button_numpad()
+        button_samping()
         return
+    if State =='menu3':
+        numlist.clear()
+        Condition='validasi pin'
+        buattext(20,180,"Permintaan Anda Sedang Diproses...",'proses')
+        if len(pinbaru) == 6:
+            def pin_terganti():
+                buatjudul(240,25,"Menu Ganti Pin",'validasi_pin')
+                canvas2.delete('proses')
+                buattext(20,180,"Ganti Pin Berhasil",'validasi_pin')
+                id.nasabah[valkartu.get()-1]['pin'] = pinbaru
+                pickle.dump(id.nasabah, open('nasabah.dat', 'wb'))
+                textkeluar('validasi_pin')
+                button_numpad()
+                button_samping()
+            root.after(2000, pin_terganti)
+        else:
+            def pin_salah():
+                canvas2.delete('proses')
+                buatjudul(240,25,"Menu Ganti Pin",'validasi_pin')
+                buattext(20,180,'Pin Baru Anda Tidak Valid','validasi_pin')
+                textkeluar('validasi_pin')
+                button_numpad()
+                button_samping()
+            root.after(2000, pin_salah)
     return
+    
 def transfer():
     global Condition,State,numlist,rekening,nominal
     if State== 'menu gagal':
@@ -144,11 +170,11 @@ def transfer():
             # ganti ini jadi menu gagal
             return
     if State=='menu4':
-        id_tujuan=(no_rek_nasabah.index(rekening))
+        id_tujuan = (no_rek_nasabah.index(rekening))
         canvas2.delete('nominal_isi')
         buattext(10,160,'Nama        : '+id.nasabah[id_tujuan]['nama'],'transfer4')
         buattext(10,200,'No.Rekening : '+id.nasabah[id_tujuan]['no-rek'],'transfer4')
-        buattext(10,240,'nominal     : '+nominal,'transfer4')
+        buattext(10,240,'Nominal     : '+nominal,'transfer4')
         buattext(375,280,'Benar-->','transfer4')
         textkeluar('transfer4')
         Condition= 'konfirmasi nominal'
@@ -160,9 +186,13 @@ def transfer():
             def transaksiberhasil():
                 global Condition
                 canvas2.delete('wait')
-                buattext(240,200,'Transaksi Berhasil','berhasil')
+                buattext(15,180,'Transaksi Berhasil','berhasil')
+                buattext(15,220,'Silahkan ambil kartu Anda kembali','berhasil')
                 textkeluar('berhasil')
                 Condition='berhasil'
+                id.nasabah[id_tujuan]['tabungan'] += nominal
+                id.nasabah[valkartu.get()-1]['tabungan'] -= nominal
+                pickle.dump(id.nasabah, open('nasabah.dat', 'wb'))
                 button_samping()    
             root.after(2000,transaksiberhasil)
             return
@@ -265,14 +295,43 @@ def button_samping():
         # ganti pin
         elif Condition=='ganti pin':
             if entry==7:
-                State='menu2'
-                canvas2.delete('pin_isi')
+                if pinlama == pinnasabah:
+                    State = 'menu2'
+                    numlist.clear()
+                    canvas2.delete('input_pin_lama')
+                    canvas2.delete('ganti_pin')
+                    ganti_pin()
+                else:
+                    State ='menu1'
+                    canvas2.delete('input_pin_lama')
+                    canvas2.delete('ganti_pin')
+                    buattext(20,280,'Pin Lama Salah','ganti_pin')
+                    numlist.clear()
+                    ganti_pin()
+            if entry==8:
+                State='menu1'
+                canvas2.delete('ganti_pin')
+                canvas2.delete('input_pin_lama')
+                keluar('ganti_pin',menu_awal)
+                return
+        
+        elif Condition == 'pin baru':
+            if entry==7:
+                State='menu3'
+                canvas2.delete('pin_baru')
+                canvas2.delete('input_pin_baru')
                 ganti_pin()
             if entry==8:
                 State='menu1'
-                canvas2.delete('pin_isi')
-                keluar('ganti_pin',menu_awal)
+                canvas2.delete('pin_baru')
+                canvas2.delete('input_pin_baru')
+                keluar('pin_baru',menu_awal)
                 return
+
+        elif Condition == 'validasi pin':
+            if entry==8:
+                State='menu1'
+                keluar('validasi_pin',menu_awal)
         # transfer
         elif Condition=='gagal':
             if entry==2:
@@ -454,7 +513,7 @@ def button_numpad():
                             width  = 120)
     
     def numbers(entry):
-        global i,numlist,Condition,rekening,nominal,pinlama
+        global i,numlist,Condition,rekening,nominal,pinlama, pinbaru, pinnasabah, State
         if Condition=='belum dicantumkan':
             return
         # ganti pin
@@ -500,7 +559,7 @@ def button_numpad():
             if entry==99:
                 # cancle
                 numlist.clear()
-                canvas2.delete('pin_isi')
+                canvas2.delete('input_pin_lama')
                 return
             elif entry==999:
                 # backspace
@@ -512,9 +571,43 @@ def button_numpad():
                 numlist.append(entry)
                 strings = [str(num) for num in numlist]
                 pinlama = "".join(strings)
-                canvas2.delete('pin_isi')
-                buattext(20,225,pinlama,'pin_isi')
+                canvas2.delete('input_pin_lama')
+                buattext(20,225,pinlama,'input_pin_lama')
+                pinnasabah=id.nasabah[valkartu.get()-1]['pin']
+                if len(pinlama) == 6: 
+                    if pinlama == pinnasabah:
+                        State = 'menu2'
+                        numlist.clear()
+                        canvas2.delete('input_pin_lama')
+                        canvas2.delete('ganti_pin')
+                        ganti_pin()
+                    else:
+                        State ='menu1'
+                        canvas2.delete('input_pin_lama')
+                        canvas2.delete('ganti_pin')
+                        buattext(20,280,'Pin Lama Salah','ganti_pin')
+                        numlist.clear()
+                        ganti_pin()
 
+        elif Condition=='pin baru':
+            
+            if entry==99:
+                # cancle
+                numlist.clear()
+                canvas2.delete('input_pin_baru')
+                return
+            elif entry==999:
+                # backspace
+                return
+            elif entry==9999:
+                # enter
+                return
+            else:
+                numlist.append(entry)
+                strings = [str(num) for num in numlist]
+                pinbaru = "".join(strings)
+                canvas2.delete('input_pin_baru')
+                buattext(20,225,pinbaru,'input_pin_baru')
 
 
             return    
