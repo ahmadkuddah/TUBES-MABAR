@@ -36,11 +36,17 @@ canvas2.create_image( 0, 0, image = bg2,anchor = "nw")
 
 # ganti_pin
 pinlama=''
+pinbaru=''
+pinnasabah=''
 
 # transfer
 rekening=''
 nominal=''
 
+# penarikan tunai
+sumber=''
+penarikan=''
+alasan=''
 # button
 numlist=[]
 Condition='belum dicantumkan'
@@ -124,12 +130,12 @@ def ganti_pin():
                 button_numpad()
                 button_samping()
             root.after(2000, pin_salah)
-    return
-    
+    return 
 def transfer():
-    global Condition,State,numlist,rekening,nominal
+    global Condition,State,numlist,rekening,nominal,alasan
     if State== 'menu gagal':
         buattext(10,125,"Batalkan transfer? ",'gagal')
+        buattext(10,150,alasan,'gagal')
         buattext(10,200,"<-- ya ",'gagal')
         buattext(10,280,"<-- tidak ",'gagal')
         textkeluar('gagal')
@@ -165,6 +171,7 @@ def transfer():
             button_numpad()
         else:
             State='menu gagal'
+            alasan='Rekening Tidak Ada'
             numlist.clear()
             transfer()
             # ganti ini jadi menu gagal
@@ -184,7 +191,7 @@ def transfer():
         buattext(140,200,'Transfer Sedang Diproses...','wait')
         if float(nominal) <= float(id.nasabah[valkartu.get()-1]['tabungan']):
             def transaksiberhasil():
-                global Condition
+                global Condition,alasan
                 canvas2.delete('wait')
                 buattext(15,180,'Transaksi Berhasil','berhasil')
                 buattext(15,220,'Silahkan ambil kartu Anda kembali','berhasil')
@@ -198,9 +205,10 @@ def transfer():
             return
         else:
             def transaksigagal():
-                global State,numlist
+                global State,numlist,alasan
                 canvas2.delete('wait')
                 State='menu gagal'
+                alasan='Saldo Tidak Cukup'
                 numlist.clear()
                 canvas2.delete('nominal isi')
                 transfer()
@@ -208,8 +216,96 @@ def transfer():
         return
 
     return
-
-
+def info_rekening():
+    global Condition,State
+    if State=='menu1':
+        buatjudul(240,10,'Info Rekening','info_rekening')
+        buattext(10,125,'Pilih Sumber Dana','info_rekening')
+        buattext(10,200,'<-- Tabungan','info_rekening')
+        buattext(10,280,'<-- Giro','info_rekening')
+        textkeluar('info_rekening')
+        Condition='info_rekening'
+        button_samping()
+        return
+    if State=='menu2':
+        # menu tabungan
+        buatjudul(240,10,'Tabungan','tabungan')
+        buattext(20,125,'Nama           : '+id.nasabah[valkartu.get()-1]['nama'],'tabungan')
+        buattext(20,175,'No. Rekening   : '+id.nasabah[valkartu.get()-1]['no-rek'],'tabungan')
+        buattext(20,225,'Saldo Tabungan : '+id.nasabah[valkartu.get()-1]['tabungan'],'tabungan')
+        textkeluar('tabungan')
+        Condition='tabungan'
+        button_samping()
+        return
+    if State=='menu3':
+        # menu giro
+        buatjudul(240,10,'Giro','giro')
+        buattext(20,125,'Nama           : '+id.nasabah[valkartu.get()-1]['nama'],'giro')
+        buattext(20,175,'No. Rekening   : '+id.nasabah[valkartu.get()-1]['no-rek'],'giro')
+        buattext(20,225,'Saldo Giro     : '+id.nasabah[valkartu.get()-1]['giro'],'giro')
+        textkeluar('giro')
+        Condition='giro'
+        button_samping()
+        return
+    return
+def penarikan_tunai():
+    global Condition,State,numlist,rekening,nominal,sumber,penarikan,alasan
+    if State== 'menu gagal':
+        buattext(10,125,"Batalkan transfer? ",'gagal')
+        buattext(10,150,alasan,'gagal')
+        buattext(10,200,"<-- ya ",'gagal')
+        buattext(10,280,"<-- tidak ",'gagal')
+        textkeluar('gagal')
+        Condition='penarikan gagal'
+        button_samping()
+        return
+    if State== 'menu1':
+        buatjudul(240,10,'Penarikan Tunai','penarikan_tunai')
+        buattext(10,125,"Pilih Sumber Dana",'penarikan_tunai')
+        buattext(10,200,"<-- Tabungan ",'penarikan_tunai')
+        buattext(10,280,"<-- Giro ",'penarikan_tunai')
+        Condition='penarikan tunai'
+        button_samping()
+        return
+    if State== 'menu2':
+        buatjudul(240,10,'Penarikan Tunai','penarikan')
+        buattext(10,125,'Sumber Dana'+sumber,'penarikan')
+        buattext(10,200,'Masukkan Nominal','penarikan')
+        buattext(375,280,'Benar-->','penarikan')
+        textkeluar('penarikan')
+        Condition='penarikan'
+        numlist.clear()
+        button_numpad()
+        button_samping()
+        return
+    if State== 'menu3':
+        # buat 2 kondisi kalo saldo ga cukup masuk ke gagal sama kalo berhasil kurangin tabungan
+        buattext(140,200,'Transfer Sedang Diproses...','wait')
+        if float(penarikan) <= float(id.nasabah[valkartu.get()-1]['tabungan']):
+            def transaksiberhasil():
+                global Condition,penarikan
+                canvas2.delete('wait')
+                buattext(15,180,'Transaksi Berhasil','berhasil')
+                buattext(15,220,'Silahkan ambil kartu Anda kembali','berhasil')
+                textkeluar('berhasil')
+                Condition='penarikan_berhasil'
+                id.nasabah[valkartu.get()-1]['tabungan'] -= penarikan
+                pickle.dump(id.nasabah, open('nasabah.dat', 'wb'))
+                button_samping()    
+            root.after(2000,transaksiberhasil)
+            return
+        else:
+            def transaksigagal():
+                global State,numlist,alasan
+                canvas2.delete('wait')
+                State='menu gagal'
+                alasan='Saldo Anda Tidak Cukup'
+                numlist.clear()
+                canvas2.delete('penarikan_isi')
+                penarikan_tunai()
+            root.after(2000,transaksigagal)
+        return
+    return
 
 
 
@@ -268,9 +364,8 @@ def button_samping():
                             width  =30)
 
     def options(entry):
-        global i,n,State
-        
-        
+        global i,n,State,sumber
+
         if Condition=='belum dicantumkan':
             return
         # login
@@ -288,7 +383,13 @@ def button_samping():
                 menuju('menu_awal',ganti_pin())            
             if entry==2:
                 State='menu1'
-                menuju('menu_awal',transfer())   
+                menuju('menu_awal',transfer()) 
+            if entry==3:
+                State='menu1'
+                menuju('menu_awal',info_rekening()) 
+            if entry==5:
+                State='menu1'
+                menuju('menu_awal',penarikan_tunai()) 
             if entry==8:
                 i=1
                 keluar('menu_awal',menu_kartu)    
@@ -313,8 +414,7 @@ def button_samping():
                 canvas2.delete('ganti_pin')
                 canvas2.delete('input_pin_lama')
                 keluar('ganti_pin',menu_awal)
-                return
-        
+                return       
         elif Condition == 'pin baru':
             if entry==7:
                 State='menu3'
@@ -327,7 +427,6 @@ def button_samping():
                 canvas2.delete('input_pin_baru')
                 keluar('pin_baru',menu_awal)
                 return
-
         elif Condition == 'validasi pin':
             if entry==8:
                 State='menu1'
@@ -408,9 +507,66 @@ def button_samping():
                 i=0
                 menuju('berhasil',menu_kartu())
             return
-        
-    
-    
+        # info rekening
+        elif Condition=='info_rekening':
+            if entry==8:
+                State='menu1'
+                keluar('info_rekening',menu_awal)
+            if entry==2:
+                State='menu2'
+                menuju('info_rekening',info_rekening)
+            if entry==3:
+                State='menu3'
+                menuju('info_rekening',info_rekening)
+
+            return
+        elif Condition=='tabungan':
+            if entry==8:
+                State='menu1'
+                keluar('tabungan',menu_awal)
+        elif Condition=='giro':
+            if entry==8:
+                State='menu1'
+                keluar('giro',menu_awal)
+        # penarikan tunai
+        elif Condition=='penarikan gagal':
+            if entry==2:
+                i=0
+                menuju('gagal',menu_login())            
+            if entry==3:
+                State='menu1'
+                menuju('gagal',penarikan_tunai())   
+            return
+        elif Condition=='penarikan tunai':
+            if entry==8:
+                State='menu1'
+                keluar('penarikan_tunai',menu_awal)
+            if entry==2:
+                State='menu2'
+                sumber='tabungan'
+                menuju('penarikan_tunai',penarikan_tunai)
+            if entry==3:
+                State='menu2'
+                sumber='giro'
+                menuju('penarikan_tunai',penarikan_tunai)
+            
+            return
+        elif Condition=='penarikan':
+            if entry==8:
+                State='menu1'
+                numlist.clear()
+                keluar('penarikan',menu_awal)
+                canvas2.delete('penarikan_isi')
+            if entry==7:
+                State='menu3'
+                menuju('penarikan',penarikan_tunai)
+                canvas2.delete('penarikan_isi')
+                return
+        elif Condition=='penarikan_berhasil':
+            if entry==8:
+                i=0
+                menuju('berhasil',menu_kartu())
+            return
     return
 def button_numpad():
     num1 = Button( root, text = "1",command=lambda:numbers(1))
@@ -513,10 +669,10 @@ def button_numpad():
                             width  = 120)
     
     def numbers(entry):
-        global i,numlist,Condition,rekening,nominal,pinlama, pinbaru, pinnasabah, State
+        global i,numlist,Condition,rekening,nominal,pinlama, pinbaru, pinnasabah, State,penarikan
         if Condition=='belum dicantumkan':
             return
-        # ganti pin
+        # login
         elif Condition=='login':
             if entry==99:
                 # cancle
@@ -533,11 +689,11 @@ def button_numpad():
             else:
                 numlist.append(entry)
             if len(numlist)==6:
-                # tambahin kondisi pin bener sama salah disini
+                
                 strings = [str(num) for num in numlist]
                 pin = "".join(strings)
                 pinnasabah=id.nasabah[valkartu.get()-1]['pin']
-                # print('ini number yang di terima',pin)
+                
                 if pin == pinnasabah:
                     canvas2.delete('password')
                     canvas2.delete('passwordisi')
@@ -557,7 +713,7 @@ def button_numpad():
         # ganti pin
         elif Condition=='ganti pin':
             if entry==99:
-                # cancle
+                # cancel
                 numlist.clear()
                 canvas2.delete('input_pin_lama')
                 return
@@ -659,7 +815,27 @@ def button_numpad():
                 canvas2.delete('nominal_isi')
                 buattext(10,225,nominal,'nominal_isi')
             return
-
+        # penarikan tunai
+        elif Condition=='penarikan':
+            if entry==99:
+                # cancle
+                numlist.clear()
+                canvas2.delete('penarikan_isi')
+                return
+            elif entry==999:
+                # backspace
+                return
+            elif entry==9999:
+                # enter
+                return
+            else:
+                numlist.append(entry)
+                strings = [str(num) for num in numlist]
+                penarikan = "".join(strings)
+                canvas2.delete('penarikan_isi')
+                buattext(10,225,penarikan,'penarikan_isi')
+            return
+            
     return
 def kartu():
         kartu1 = Button( root,image=kart1,highlightthickness = 0, bd = 0,command=lambda:value_kartu(1))
