@@ -282,7 +282,7 @@ def penarikan_tunai():
     if State== 'menu3':
         # buat 2 kondisi kalo saldo ga cukup masuk ke gagal sama kalo berhasil kurangin tabungan
         buattext(140,200,'Transfer Sedang Diproses...','wait')
-        if float(penarikan) <= float(id.nasabah[valkartu.get()-1]['tabungan']):
+        if float(penarikan) <= float(id.nasabah[valkartu.get()-1][sumber]):
             def transaksiberhasil():
                 global Condition,penarikan
                 canvas2.delete('wait')
@@ -290,7 +290,7 @@ def penarikan_tunai():
                 buattext(15,220,'Silahkan ambil kartu Anda kembali','berhasil')
                 textkeluar('berhasil')
                 Condition='penarikan_berhasil'
-                id.nasabah[valkartu.get()-1][sumber] -= penarikan
+                id.nasabah[valkartu.get()-1][sumber] = str(float(id.nasabah[valkartu.get()-1][sumber])-float(penarikan))
                 pickle.dump(id.nasabah, open('nasabah.dat', 'wb'))
                 button_samping()    
             root.after(2000,transaksiberhasil)
