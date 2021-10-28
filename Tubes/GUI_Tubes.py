@@ -289,7 +289,7 @@ def penarikan_tunai():
                 buattext(15,220,'Silahkan ambil kartu Anda kembali','berhasil')
                 textkeluar('berhasil')
                 Condition='penarikan_berhasil'
-                id.nasabah[valkartu.get()-1]['tabungan'] -= penarikan
+                id.nasabah[valkartu.get()-1][sumber] -= penarikan
                 pickle.dump(id.nasabah, open('nasabah.dat', 'wb'))
                 button_samping()    
             root.after(2000,transaksiberhasil)
