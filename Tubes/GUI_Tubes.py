@@ -188,6 +188,7 @@ def transfer():
         button_samping()
         return    
     if State=='menu5':       
+        id_tujuan = (no_rek_nasabah.index(rekening))
         buattext(140,200,'Transfer Sedang Diproses...','wait')
         if float(nominal) <= float(id.nasabah[valkartu.get()-1]['tabungan']):
             def transaksiberhasil():
@@ -197,11 +198,11 @@ def transfer():
                 buattext(15,220,'Silahkan ambil kartu Anda kembali','berhasil')
                 textkeluar('berhasil')
                 Condition='berhasil'
-                id.nasabah[id_tujuan]['tabungan'] += nominal
-                id.nasabah[valkartu.get()-1]['tabungan'] -= nominal
-                pickle.dump(id.nasabah, open('nasabah.dat', 'wb'))
                 button_samping()    
             root.after(2000,transaksiberhasil)
+            id.nasabah[id_tujuan]['tabungan'] = str(float(id.nasabah[id_tujuan]['tabungan'])+float(nominal))
+            id.nasabah[valkartu.get()-1]['tabungan'] = str(float(id.nasabah[valkartu.get()-1]['tabungan'])-float(nominal))
+            pickle.dump(id.nasabah, open('nasabah.dat', 'wb'))
             return
         else:
             def transaksigagal():
