@@ -2,9 +2,9 @@ import tkinter as tk
 from tkinter import *
 import Data_Id as id
 from Data_Id import *
-import Transfer_ as tf
 from Transfer_ import *
 import pickle
+import Data_Pembayaran as dp
 
 # membuat tampilan utama
 root=tk.Tk()
@@ -47,6 +47,12 @@ nominal=''
 sumber=''
 penarikan=''
 alasan=''
+
+# pembayaran
+tujuan_pembayaran=''
+idpembayaran=''
+
+
 # button
 numlist=[]
 Condition='belum dicantumkan'
@@ -265,6 +271,7 @@ def penarikan_tunai():
         buattext(10,125,"Pilih Sumber Dana",'penarikan_tunai')
         buattext(10,200,"<-- Tabungan ",'penarikan_tunai')
         buattext(10,280,"<-- Giro ",'penarikan_tunai')
+        textkeluar('penarikan_tunai')
         Condition='penarikan tunai'
         button_samping()
         return
@@ -307,7 +314,73 @@ def penarikan_tunai():
             root.after(2000,transaksigagal)
         return
     return
-
+def pembayaran():
+    global Condition,tujuan_pembayaran,numlist,alasan
+    if State== 'menu gagal':
+        buattext(10,125,"Batalkan transfer? ",'gagal')
+        buattext(10,150,alasan,'gagal')
+        buattext(10,200,"<-- ya ",'gagal')
+        buattext(10,280,"<-- tidak ",'gagal')
+        textkeluar('gagal')
+        Condition='pembayaran gagal'
+        button_samping()
+    if State=='menu1':
+        buatjudul(240,10,'Pembayaran','pembayaran')
+        buattext(10,125,"Pilih Opsi Pembayaran: ",'pembayaran')
+        buattext(10,200,"<-- PLN ",'pembayaran')
+        buattext(10,280,"<-- Internet ",'pembayaran')
+        buattext(10,360,"<-- Pendidikan ",'pembayaran')
+        textkeluar('pembayaran')
+        Condition='pembayaran'
+        button_samping()
+        return
+    if State=='menu2':
+        buatjudul(240,10,'Pembayaran','pembayaran_')
+        buattext(10,125,"Anda Memilihi pembayaran "+tujuan_pembayaran,'pembayaran_')
+        buattext(10,175,"Silahkan Masukkan 5 digit \nID pelanggan: ",'pembayaran_')
+        buattext(375,280,'Benar-->','pembayaran_')
+        textkeluar('pembayaran_')
+        Condition='id pembayaran'
+        numlist.clear()
+        button_samping()
+        button_numpad()
+        return
+    if State=='menu3':
+        # sebutin nominal yang perlu di bayar terus tanyain apakah bener
+        buatjudul(240,10,'Pembayaran','konfirmasi_pembayaran')
+        buattext(10,175,"Tagihan yang Perlu Anda Bayar Sebesar\n "+str(dp.tagihan),'konfirmasi_pembayaran')
+        buattext(375,280,'Benar-->','konfirmasi_pembayaran')
+        textkeluar('konfirmasi_pembayaran')
+        Condition='konfirmasi pembayaran'
+        numlist.clear()
+        button_samping()
+        return
+    if State=='menu4':
+        buattext(140,200,'Transfer Sedang Diproses...','wait')
+        if float(dp.tagihan) <= float(id.nasabah[valkartu.get()-1]['tabungan']):
+            def transaksiberhasil():
+                global Condition,penarikan
+                canvas2.delete('wait')
+                buattext(15,180,'Transaksi Berhasil','berhasil')
+                buattext(15,220,'Silahkan ambil kartu Anda kembali','berhasil')
+                textkeluar('berhasil')
+                Condition='penarikan_berhasil'
+                id.nasabah[valkartu.get()-1]['tabungan'] = str(float(id.nasabah[valkartu.get()-1]['tabungan'])-float(dp.tagihan))
+                pickle.dump(id.nasabah, open('nasabah.dat', 'wb'))
+                button_samping()    
+            root.after(2000,transaksiberhasil)
+            return
+        else:
+            def transaksigagal():
+                global State,numlist,alasan
+                canvas2.delete('wait')
+                State='menu gagal'
+                alasan='Saldo Anda Tidak Cukup'
+                numlist.clear()
+                pembayaran()
+            root.after(2000,transaksigagal)
+        return
+    return
 
 
 
@@ -365,7 +438,7 @@ def button_samping():
                             width  =30)
 
     def options(entry):
-        global i,n,State,sumber
+        global i,n,State,sumber,tujuan_pembayaran,idpembayaran
 
         if Condition=='belum dicantumkan':
             return
@@ -390,7 +463,10 @@ def button_samping():
                 menuju('menu_awal',info_rekening()) 
             if entry==5:
                 State='menu1'
-                menuju('menu_awal',penarikan_tunai()) 
+                menuju('menu_awal',penarikan_tunai())
+            if entry==6:
+                State='menu1'
+                menuju('menu_awal',pembayaran())  
             if entry==8:
                 i=1
                 keluar('menu_awal',menu_kartu)    
@@ -568,6 +644,62 @@ def button_samping():
                 i=0
                 menuju('berhasil',menu_kartu())
             return
+        # pembayaran
+        elif Condition=='pembayaran gagal':
+            if entry==2:
+                i=0
+                menuju('gagal',menu_login())            
+            if entry==3:
+                State='menu1'
+                menuju('gagal',pembayaran())   
+            return
+        elif Condition=='pembayaran':
+            if entry==8:
+                State='menu1'
+                keluar('pembayaran',menu_awal)
+            if entry==2:
+                State='menu2'
+                tujuan_pembayaran='PLN'
+                menuju('pembayaran',pembayaran)
+            if entry==3:
+                State='menu2'
+                tujuan_pembayaran='Internet'
+                menuju('pembayaran',pembayaran)
+            if entry==3:
+                State='menu2'
+                tujuan_pembayaran='Pendidikan'
+                menuju('pembayaran',pembayaran)
+            
+            return
+        elif Condition=='id pembayaran':
+            if entry==8:
+                State='menu1'
+                numlist.clear()
+                keluar('pembayaran_',menu_awal)
+                canvas2.delete('pembayaran_id')
+            if entry==7:
+                if len(idpembayaran)!=5:
+                    buattext(10,250,'Masukkan 5 Digit id','pembayaran_')
+                else:
+                    dp.tagihan_(int(idpembayaran))
+                    State='menu3'
+                    numlist.clear()
+                    menuju('pembayaran_',pembayaran)
+                    canvas2.delete('pembayaran_id')
+                return
+            return
+        elif Condition=='konfirmasi pembayaran':
+            if entry==8:
+                State='menu1'
+                numlist.clear()
+                keluar('konfirmasi_pembayaran',menu_awal)
+            if entry==7:
+                State='menu4'
+                numlist.clear()
+                menuju('konfirmasi_pembayaran',pembayaran)
+                # kurangin saldo
+                return
+    
     return
 def button_numpad():
     num1 = Button( root, text = "1",command=lambda:numbers(1))
@@ -670,7 +802,7 @@ def button_numpad():
                             width  = 120)
     
     def numbers(entry):
-        global i,numlist,Condition,rekening,nominal,pinlama, pinbaru, pinnasabah, State,penarikan
+        global i,numlist,Condition,rekening,nominal,pinlama, pinbaru, pinnasabah, State,penarikan,idpembayaran
         if Condition=='belum dicantumkan':
             return
         # login
@@ -836,7 +968,26 @@ def button_numpad():
                 canvas2.delete('penarikan_isi')
                 buattext(10,225,penarikan,'penarikan_isi')
             return
-            
+        # pembayaran
+        elif Condition=='id pembayaran':
+            if entry==99:
+                # cancle
+                numlist.clear()
+                canvas2.delete('pembayaran_id')
+                return
+            elif entry==999:
+                # backspace
+                return
+            elif entry==9999:
+                # enter
+                return
+            else:
+                numlist.append(entry)
+                strings = [str(num) for num in numlist]
+                idpembayaran = "".join(strings)
+                canvas2.delete('pembayaran_id')
+                buattext(10,225,idpembayaran,'pembayaran_id')
+            return
     return
 def kartu():
         kartu1 = Button( root,image=kart1,highlightthickness = 0, bd = 0,command=lambda:value_kartu(1))
