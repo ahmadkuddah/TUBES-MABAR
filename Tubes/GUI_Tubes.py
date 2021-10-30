@@ -665,7 +665,7 @@ def button_samping():
                 State='menu2'
                 tujuan_pembayaran='Internet'
                 menuju('pembayaran',pembayaran)
-            if entry==3:
+            if entry==4:
                 State='menu2'
                 tujuan_pembayaran='Pendidikan'
                 menuju('pembayaran',pembayaran)
