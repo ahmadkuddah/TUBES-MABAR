@@ -20,6 +20,7 @@
 # Condition = string yang berguna untuk menyatakan kondisi dari ui kepada button sehingga menyatakan fungsi dari button tersebut pada kondisi tertentu
 # State = string yang berguna untuk menyatakan kondisi dari button kepada ui untuk mengganti tampilan
 # i = integer yang berguna untuk menghitung panjangnya '*' yang diisikan pada ui ketika menginput password saat login
+# n = integer yang berguna untuk menandakan bank tujuan pada menu transfer
 
 # import library
 import tkinter as tk
@@ -78,6 +79,7 @@ numlist=[]
 Condition='belum dicantumkan'
 State='menu1'
 i=1
+n=0
 
 # code visual menu
 def menu_kartu():
@@ -156,7 +158,7 @@ def ganti_pin():
             root.after(2000, pin_salah)
     return 
 def transfer():
-    global Condition,State,numlist,rekening,nominal,alasan
+    global Condition,State,numlist,rekening,nominal,alasan,n
     if State== 'menu gagal':
         buattext(10,125,"Batalkan transfer? ",'gagal')
         buattext(10,150,alasan,'gagal')
@@ -211,7 +213,7 @@ def transfer():
         Condition= 'konfirmasi nominal'
         button_samping()
         return    
-    if State=='menu5':       
+    if State=='menu5':
         id_tujuan = (no_rek_nasabah.index(rekening))
         buattext(140,200,'Transfer Sedang Diproses...','wait')
         if float(nominal) <= float(id.nasabah[valkartu.get()-1]['tabungan']):
@@ -402,7 +404,7 @@ def pembayaran():
 
 
 
-# code visual button dan text yang berulang
+# code visual button dan text yang berulang untuk memudahkan penulisan command
 def button_samping():
     button1 = Button( root, text = "1",command=lambda:options(1))
     button2 = Button( root, text = "2",command=lambda:options(2))
@@ -541,14 +543,17 @@ def button_samping():
                 keluar('Transfer',menu_awal)
             if entry==1:
                 State='menu2'
+                n=1
                 menuju('Transfer',transfer)
                 return
             if entry==2:                
                 State='menu2'
+                n=2
                 menuju('Transfer',transfer)
                 return
             if entry==3:
                 State='menu2'
+                n=3
                 menuju('Transfer',transfer)
                 return
 
