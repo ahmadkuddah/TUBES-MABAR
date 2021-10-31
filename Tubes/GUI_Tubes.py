@@ -1,3 +1,27 @@
+# kamus
+# inisiasi variabel yang digunakan pada program yaitu sebagai berikut
+# ganti_pin:
+# pinlama = string yang digunakan sebagai variabel yang mengambil input user yang nantinya akan dicocokan dengan pin nasabah
+# pinbaru = string yang digunakan sebagai variabel yang mengambil input user yang nantinya akan menjadi pin baru nasabah
+# pinnasabah = string yang berisikan variabel yang mengambil pin nasabah yang terdapat pada data base pada saat itu
+# transfer:
+# rekening = string yang digunakan sebagai variabel yang mengambil input user berupa rekening tujuan
+# nominal = string yang digunakan sebagai variabel yang mengambil input user berupa nominal yang ingin ditransfer kepada rekening tujuan
+# penarikan tunai: 
+# sumber = string yang digunakan sebagai variabel yang mengambil input user ketika memilih sumber dana yang akan digunakan untuk melakukan penarikan tunai
+# penarikan = string yang digunakan sebagai variabel yang mengambil input user berupa nominal yang ingin ditarik dari sumber dana nasabah
+# alasan = string yang digunakan untuk menentukan alasan gagalnya sebuah transaksi
+# pembayaran:
+# tujuan_pembayaran = string yang digunakan sebagai variabel yang mengambil input user berupa tujuan pembayaran seperti Pendidikan,PLN,atau Internet
+# idpembayaran = string yang digunakan sebagai variabel yang mengambil input user berupa id yang dituju yang nantinya akan dicocokan dengan id yang ada pada data pembayaran
+# alasan = string yang digunakan untuk menentukan alasan gagalnya sebuah transaksi
+# button:
+# numlist = berupa array yang menerima input dari button dan menyimpan setiap angka yang di input oleh tombol
+# Condition = string yang berguna untuk menyatakan kondisi dari ui kepada button sehingga menyatakan fungsi dari button tersebut pada kondisi tertentu
+# State = string yang berguna untuk menyatakan kondisi dari button kepada ui untuk mengganti tampilan
+# i = integer yang berguna untuk menghitung panjangnya '*' yang diisikan pada ui ketika menginput password saat login
+
+# import library
 import tkinter as tk
 from tkinter import *
 import Data_Id as id
@@ -6,6 +30,7 @@ from Transfer_ import *
 import pickle
 import Data_Pembayaran as dp
 
+# algoritma
 # membuat tampilan utama
 root=tk.Tk()
 root.title('ATM Bank Ganesha')
@@ -16,7 +41,7 @@ canvas1.pack(fill = "both", expand = True)
 canvas1.create_image( 0, 0, image = bg,anchor = "nw")
 root.resizable('0','0')
 
-# photo kartu
+# memasukkan photo kartu untuk UI
 kart1=PhotoImage(file='.\Assets\Kartu-1.png')
 kart2=PhotoImage(file='.\Assets\Kartu-2.png')
 kart3=PhotoImage(file='.\Assets\Kartu-3.png')
@@ -33,48 +58,41 @@ canvas2.pack(fill = "both", expand = True)
 canvas2.create_image( 0, 0, image = bg2,anchor = "nw")
 
 # inisiasi yang dibutuhkan untuk membantu jalannya program
-
 # ganti_pin
 pinlama=''
 pinbaru=''
 pinnasabah=''
-
 # transfer
 rekening=''
 nominal=''
-
 # penarikan tunai
 sumber=''
 penarikan=''
 alasan=''
-
 # pembayaran
 tujuan_pembayaran=''
 idpembayaran=''
-
-
+alasan=''
 # button
 numlist=[]
 Condition='belum dicantumkan'
 State='menu1'
 i=1
-n=0
 
 # code visual menu
 def menu_kartu():
+    global Condition
     canvas1.create_text(650,10,text="Pilih kartu", font='courier 20 bold', anchor='n', fill="white",tags='kartu')
     valkartu.set(0)
-    global Condition
     Condition='kartu'
     kartu()
     return
 def menu_login ():
+    global numlist,Condition
     canvas2.create_text(240,10,text="Selamat Datang di\n" "ATM Bank Ganesha", font='courier 20 bold', anchor='n', fill="white", tags='password')
     canvas2.create_text(20,190,text="Silahkan Masukkan Nomor Pin Anda:", font='courier 15 bold', anchor='w', fill="white", tags='password')
     canvas2.create_text(470,360,text="Keluar-->", font='courier 15 bold', anchor='e', fill="white", tags='password')
-    global numlist
-    numlist=[]
-    global Condition
+    numlist.clear()
     Condition='login'
     button_numpad()
     button_samping()
@@ -523,17 +541,14 @@ def button_samping():
                 keluar('Transfer',menu_awal)
             if entry==1:
                 State='menu2'
-                n=1
                 menuju('Transfer',transfer)
                 return
             if entry==2:                
                 State='menu2'
-                n=2
                 menuju('Transfer',transfer)
                 return
             if entry==3:
                 State='menu2'
-                n=3
                 menuju('Transfer',transfer)
                 return
 
@@ -877,7 +892,6 @@ def button_numpad():
                         buattext(20,280,'Pin Lama Salah','ganti_pin')
                         numlist.clear()
                         ganti_pin()
-
         elif Condition=='pin baru':
             
             if entry==99:
@@ -1001,13 +1015,11 @@ def kartu():
                                 window = kartu1,
                                 tags='kartu'
                                 )
-
         canvas1.create_window( 910, 3,
                                 anchor = "n",
                                 window = kartu2,
                                 tags='kartu'
                                 )
-
         canvas1.create_window( 1020,3, 
                                 anchor = "n",
                                 window = kartu3,
