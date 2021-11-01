@@ -26,7 +26,6 @@
 import tkinter as tk
 from tkinter import *
 import Data_Id as id
-from Data_Id import *
 from Transfer_ import *
 import pickle
 import Data_Pembayaran as dp
@@ -401,8 +400,6 @@ def pembayaran():
             root.after(2000,transaksigagal)
         return
     return
-
-
 
 # code visual button dan text yang berulang untuk memudahkan penulisan command
 def button_samping():
@@ -1070,7 +1067,7 @@ def menuju(menuhapus,tujuan):
     tujuan()
 
 # inisiasi loop
-valkartu=tk.IntVar(0)
+valkartu=tk.IntVar(0) #untuk mengambil id pelanggan
 button_samping()
 button_numpad()
 menu_kartu()
